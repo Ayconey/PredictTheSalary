@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=pts
+      - POSTGRES_USER=db_pts_user
+      - POSTGRES_PASSWORD=secretlyhiddenpassword7621
+    ports:
+      - "5432:5432"
+  backend:
+    build: backend
+    command: sh -c "python backend/manage.py wait_for_db && python backend/manage.py migrate && python backend/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/code/
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=foo
+      - ALLOWED_HOSTS=localhost
+      - DB_HOST=db
+      - DB_NAME=pts
+      - DB_USER=db_pts_user
+      - DB_PASS=secretlyhiddenpassword7621
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  frontend:
+    build: frontend
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+
